@@ -152,10 +152,9 @@ class RedirectResource:
             target_address
         )
 
-        # raise redirect to shop url
-        raise falcon.HTTPPermanentRedirect(
-            location=REDIRECT_URL.format(address=target_address, amount=co2_amount)
-        )
+        # return checkout url
+        resp.content_type = falcon.MEDIA_JSON
+        resp.text = json.dumps({"url": REDIRECT_URL.format(address=target_address, amount=co2_amount)})
 
 
 app = falcon.App(
