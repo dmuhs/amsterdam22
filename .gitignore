@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 
 contracts/node_modules
+.env
+contracts/cache
