@@ -10,6 +10,12 @@ import config
 KNOWN_ACCOUNTS = []
 
 
+def handle_error(resp: Response, status: str, msg: str):
+    resp.status = status
+    resp.content_type = falcon.MEDIA_TEXT
+    resp.text = msg
+
+
 class SuccessCallbackResource:
     def on_get(self, req: Request, resp: Response):
         client = patch_api.ApiClient(api_key=config.PATCH_API_KEY)
@@ -25,39 +31,43 @@ class SuccessCallbackResource:
             or len(target_addr) != 42
             or not target_addr.startswith("0x")
         ):
-            resp.status = falcon.HTTP_400
-            resp.content_type = falcon.MEDIA_TEXT
-            resp.text = "missing param: metadata[address]"
+            handle_error(
+                resp=resp,
+                status=falcon.HTTP_400,
+                msg="missing param: metadata[address]",
+            )
             return
 
         if target_addr in KNOWN_ACCOUNTS:
-            resp.status = falcon.HTTP_403
-            resp.content_type = falcon.MEDIA_TEXT
-            resp.text = "This address has already claimed."
+            handle_error(
+                resp=resp,
+                status=falcon.HTTP_403,
+                msg="This address has already claimed.",
+            )
             return
 
         order_id = req.get_param("order_id")
         print(f"Got order id: {order_id}")
         if order_id is None:
-            resp.status = falcon.HTTP_400
-            resp.content_type = falcon.MEDIA_TEXT
-            resp.text = "missing param: order_id"
+            handle_error(
+                resp=resp, status=falcon.HTTP_400, msg="missing param: order_id"
+            )
             return
 
         order = client.orders.retrieve_order(id=order_id)
         print(f"Got order: {order}")
         order = order.data
         if order is None:
-            resp.status = falcon.HTTP_400
-            resp.content_type = falcon.MEDIA_TEXT
-            resp.text = "patch api returned empty order"
+            handle_error(
+                resp=resp, status=falcon.HTTP_400, msg="patch api returned empty order"
+            )
             return
 
         test_addr = order.metadata.get("address")
         if test_addr is None or test_addr != target_addr:
-            resp.status = falcon.HTTP_400
-            resp.content_type = falcon.MEDIA_TEXT
-            resp.text = "url vs address mismatch"
+            handle_error(
+                resp=resp, status=falcon.HTTP_400, msg="url vs address mismatch"
+            )
             return
 
         # prepare minting tx
@@ -99,19 +109,16 @@ class FailureCallbackResource:
         print(f"Data: {doc}")
         print(f"Headers: {req.headers}")
         print(f"Params: {req.params}")
-        resp.status = falcon.HTTP_200
-        resp.content_type = falcon.MEDIA_TEXT
-        resp.text = "failure"
+        handle_error(resp=resp, status=falcon.HTTP_400, msg="failure")
 
 
 class EstimationResource:
     def on_get(self, req: Request, resp: Response):
         target_address = req.get_param("address")
         if target_address is None:
-            # TODO: redirect to regular frontend
-            resp.status = falcon.HTTP_400
-            resp.content_type = falcon.MEDIA_TEXT
-            resp.text = "missing param: address"
+            handle_error(
+                resp=resp, status=falcon.HTTP_400, msg="missing param: address"
+            )
             return
 
         calc = CarbonCalculator(chainConfig=config.ChainExplorerConfig.ETHERSCAN)
@@ -135,10 +142,9 @@ class RedirectResource:
         # validate address
         target_address = req.get_param("address")
         if target_address is None:
-            # TODO: redirect to regular frontend
-            resp.status = falcon.HTTP_400
-            resp.content_type = falcon.MEDIA_TEXT
-            resp.text = "missing param: address"
+            handle_error(
+                resp=resp, status=falcon.HTTP_400, msg="missing param: address"
+            )
             return
 
         # calculate amount of addr
