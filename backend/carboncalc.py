@@ -27,11 +27,11 @@ class CarbonCalculator:
         resp = requests.get(url, headers=self.HEADERS)
         data = resp.json()
         if data.get("status") != "1" or data.get("message") != "OK":
-            print("data provider error")
+            logger.info("data provider error")
             return 0, 0, 0
 
         if not data["result"]:
-            print("addr doesn't seem to have txs")
+            logger.info("addr doesn't seem to have txs")
             return 0, 0, 0
 
         total_gas = 0

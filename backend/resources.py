@@ -5,6 +5,7 @@ import json
 import patch_api
 from carboncalc import CarbonCalculator
 import config
+from loguru import logger
 
 
 KNOWN_ACCOUNTS = []
@@ -21,9 +22,9 @@ class SuccessCallbackResource:
         client = patch_api.ApiClient(api_key=config.PATCH_API_KEY)
 
         doc = req.stream.read(req.content_length or 0)
-        print(f"Data: {doc}")
-        print(f"Headers: {req.headers}")
-        print(f"Params: {req.params}")
+        logger.info(f"Data: {doc}")
+        logger.info(f"Headers: {req.headers}")
+        logger.info(f"Params: {req.params}")
 
         target_addr: str = req.get_param("metadata[address]")
         if (
@@ -47,7 +48,7 @@ class SuccessCallbackResource:
             return
 
         order_id = req.get_param("order_id")
-        print(f"Got order id: {order_id}")
+        logger.info(f"Got order id: {order_id}")
         if order_id is None:
             handle_error(
                 resp=resp, status=falcon.HTTP_400, msg="missing param: order_id"
@@ -55,7 +56,7 @@ class SuccessCallbackResource:
             return
 
         order = client.orders.retrieve_order(id=order_id)
-        print(f"Got order: {order}")
+        logger.info(f"Got order: {order}")
         order = order.data
         if order is None:
             handle_error(
@@ -71,7 +72,7 @@ class SuccessCallbackResource:
             return
 
         # prepare minting tx
-        print(f"Preparing tx for {target_addr}")
+        logger.info(f"Preparing tx for {target_addr}")
         w3 = Web3(Web3.HTTPProvider(config.INFURA_URL))
         nonce = w3.eth.get_transaction_count(config.PUBLIC_KEY)
         contract_instance = w3.eth.contract(address=config.NFT_ADDR, abi=config.ABI)
@@ -89,14 +90,14 @@ class SuccessCallbackResource:
         )
 
         # send mint tx
-        print(f"Sending tx for {target_addr}")
+        logger.info(f"Sending tx for {target_addr}")
         signed_tx = w3.eth.account.sign_transaction(tx, private_key=config.PRIVATE_KEY)
         w3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
         KNOWN_ACCOUNTS.append(target_addr)
 
         # redirect back to frontend
-        print(f"Redirecting")
+        logger.info(f"Redirecting")
         registry_url = order.registry_url
         raise falcon.HTTPPermanentRedirect(
             location=config.FRONTEND_SUCCESS_URL or registry_url or config.FALLBACK_URL
@@ -106,9 +107,9 @@ class SuccessCallbackResource:
 class FailureCallbackResource:
     def on_get(self, req: Request, resp: Response):
         doc = req.stream.read(req.content_length or 0)
-        print(f"Data: {doc}")
-        print(f"Headers: {req.headers}")
-        print(f"Params: {req.params}")
+        logger.info(f"Data: {doc}")
+        logger.info(f"Headers: {req.headers}")
+        logger.info(f"Params: {req.params}")
         handle_error(resp=resp, status=falcon.HTTP_400, msg="failure")
 
 

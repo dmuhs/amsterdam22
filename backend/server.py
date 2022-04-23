@@ -1,6 +1,7 @@
 from wsgiref.simple_server import make_server
 import falcon
 import resources
+from loguru import logger
 
 
 cors = falcon.CORSMiddleware(allow_origins="*", allow_credentials="*")
@@ -13,7 +14,7 @@ app.add_route("/failure", resources.FailureCallbackResource())
 
 if __name__ == "__main__":
     with make_server("", 8000, app) as httpd:
-        print("Serving on port 8000...")
+        logger.info("Serving on port 8000...")
 
         # Serve until process is killed
         httpd.serve_forever()
