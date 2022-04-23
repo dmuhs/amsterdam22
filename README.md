@@ -18,12 +18,14 @@ You can also download your official patch.io certificate which you will also rec
 - Technology used
   - Next.js
   - Python
+  - Javascript
   - Solidity
   - Hardhat
   - Infura
   - Etherscan
   - OpenZeppelin
   - Patch.io
+  - Ethereum
 - Sponsor technology ? how did it benefit your project?
   - WalletConnect
   - Polygon
