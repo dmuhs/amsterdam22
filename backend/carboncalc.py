@@ -3,9 +3,14 @@ import time
 
 
 class ChainExplorerConfig:
-    ETHERSCAN = {"apiKey": "RVXR4IXM4K7TKUI2H7XQBGHZDDBP393KFP", "baseUri": "api.etherscan.io"} # dom
-    POLYGONSCAN = {"apiKey": "V99R51EYZRATHEK6QK3T3ACPXHFCBMFCWF", "baseUri": "api.polygonscan.com"} # rmfblqsrfthfxssbrk - password: rmfblqsrfthfxssbrk@bvhrk.com (throwaway)
-
+    ETHERSCAN = {
+        "apiKey": "RVXR4IXM4K7TKUI2H7XQBGHZDDBP393KFP",
+        "baseUri": "api.etherscan.io",
+    }  # dom
+    POLYGONSCAN = {
+        "apiKey": "V99R51EYZRATHEK6QK3T3ACPXHFCBMFCWF",
+        "baseUri": "api.polygonscan.com",
+    }  # rmfblqsrfthfxssbrk - password: rmfblqsrfthfxssbrk@bvhrk.com (throwaway)
 
 
 class CarbonCalculator:
@@ -53,7 +58,7 @@ class CarbonCalculator:
         total_gas, tx_count = self.getTotalGasFromAllContractTransactions(
             address, txFilter
         )
-        return total_gas, int(total_gas * self.G_CO2_PER_GAS), tx_count
+        return total_gas, max(1_000_000, int(total_gas * self.G_CO2_PER_GAS)), tx_count
 
 
 if __name__ == "__main__":

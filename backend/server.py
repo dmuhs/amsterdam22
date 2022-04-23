@@ -7,7 +7,7 @@ import falcon
 from web3 import Web3
 import json
 import patch_api
-from carboncalc import CarbonCalculator
+from carboncalc import CarbonCalculator, ChainExplorerConfig
 
 
 PATCH_API_KEY = "key_test_406d0d4c03d8da034afb695155318569"
@@ -22,9 +22,18 @@ FRONTEND_SUCCESS_URL = None  # auto-redirects to certificate if None
 FRONTEND_URL = "http://"
 FALLBACK_URL = "https://google.com"  # TODO: replace with frontend url
 
+KNOWN_ACCOUNTS = []
+
+
 class EtherscanApiConfig:
-    ETHERSCAN = {"apiKey": "RVXR4IXM4K7TKUI2H7XQBGHZDDBP393KFP", "baseUri": "api.etherscan.io"} # dom
-    POLYGONSCAN = {"apiKey": "V99R51EYZRATHEK6QK3T3ACPXHFCBMFCWF", "baseUri": "api.polygonscan.com"} # rmfblqsrfthfxssbrk - password: rmfblqsrfthfxssbrk@bvhrk.com (throwaway)
+    ETHERSCAN = {
+        "apiKey": "RVXR4IXM4K7TKUI2H7XQBGHZDDBP393KFP",
+        "baseUri": "api.etherscan.io",
+    }  # dom
+    POLYGONSCAN = {
+        "apiKey": "V99R51EYZRATHEK6QK3T3ACPXHFCBMFCWF",
+        "baseUri": "api.polygonscan.com",
+    }  # rmfblqsrfthfxssbrk - password: rmfblqsrfthfxssbrk@bvhrk.com (throwaway)
 
 
 # TODO: build erc721 contract, generate local privkey, set pubkey as owner
@@ -50,6 +59,12 @@ class SuccessCallbackResource:
             resp.status = falcon.HTTP_400
             resp.content_type = falcon.MEDIA_TEXT
             resp.text = "missing param: metadata[address]"
+            return
+
+        if target_addr in KNOWN_ACCOUNTS:
+            resp.status = falcon.HTTP_403
+            resp.content_type = falcon.MEDIA_TEXT
+            resp.text = "This address has already claimed."
             return
 
         order_id = req.get_param("order_id")
@@ -96,6 +111,8 @@ class SuccessCallbackResource:
         signed_tx = w3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
         w3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
+        KNOWN_ACCOUNTS.append(target_addr)
+
         # redirect back to frontend
         print(f"Redirecting")
         registry_url = order.registry_url
@@ -125,7 +142,7 @@ class EstimationResource:
             resp.text = "missing param: address"
             return
 
-        calc = CarbonCalculator(chainConfig=EtherscanApiConfig.ETHERSCAN)
+        calc = CarbonCalculator(chainConfig=ChainExplorerConfig.ETHERSCAN)
         total_gas, co2_amount, tx_count = calc.getCarbonFootprintForContractAddress(
             target_address
         )
@@ -136,6 +153,7 @@ class EstimationResource:
                 "amount": co2_amount,
                 "totalGas": total_gas,
                 "txCount": tx_count,
+                "known": target_address in KNOWN_ACCOUNTS,
             }
         )
 
@@ -152,14 +170,16 @@ class RedirectResource:
             return
 
         # calculate amount of addr
-        calc = CarbonCalculator(api_key=ETHERSCAN_API_KEY)
+        calc = CarbonCalculator(chainConfig=ChainExplorerConfig.ETHERSCAN)
         total_gas, co2_amount, tx_count = calc.getCarbonFootprintForContractAddress(
             target_address
         )
 
         # return checkout url
         resp.content_type = falcon.MEDIA_JSON
-        resp.text = json.dumps({"url": REDIRECT_URL.format(address=target_address, amount=co2_amount)})
+        resp.text = json.dumps(
+            {"url": REDIRECT_URL.format(address=target_address, amount=co2_amount)}
+        )
 
 
 app = falcon.App(
