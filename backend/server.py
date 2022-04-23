@@ -5,6 +5,7 @@ from wsgiref.simple_server import make_server
 from falcon import Request, Response
 import falcon
 from web3 import Web3
+import json
 import patch_api
 from carboncalc import CarbonCalculator
 
@@ -20,7 +21,7 @@ REDIRECT_URL = "https://checkout.patch.io/che_test_d1101c10f00dad1402f21ccc54f56
 FRONTEND_SUCCESS_URL = None  # auto-redirects to certificate if None
 FRONTEND_URL = "http://"
 FALLBACK_URL = "https://google.com"  # TODO: replace with frontend url
-
+ETHERSCAN_API_KEY = "RVXR4IXM4K7TKUI2H7XQBGHZDDBP393KFP"
 # TODO: build erc721 contract, generate local privkey, set pubkey as owner
 
 
@@ -56,14 +57,14 @@ class SuccessCallbackResource:
 
         order = client.orders.retrieve_order(id=order_id)
         print(f"Got order: {order}")
-        order = order.get("data")
+        order = order.data
         if order is None:
             resp.status = falcon.HTTP_400
             resp.content_type = falcon.MEDIA_TEXT
             resp.text = "patch api returned empty order"
             return
 
-        test_addr = order.get("metadata", {}).get("address")
+        test_addr = order.metadata.get("address")
         if test_addr is None or test_addr != target_addr:
             resp.status = falcon.HTTP_400
             resp.content_type = falcon.MEDIA_TEXT
@@ -92,7 +93,7 @@ class SuccessCallbackResource:
 
         # redirect back to frontend
         print(f"Redirecting")
-        registry_url = order.get("data", {}).get("registry_url")
+        registry_url = order.registry_url
         raise falcon.HTTPPermanentRedirect(
             location=FRONTEND_SUCCESS_URL or registry_url or FALLBACK_URL
         )
@@ -111,13 +112,6 @@ class FailureCallbackResource:
 
 class EstimationResource:
     def on_get(self, req: Request, resp: Response):
-        # martin's stuff
-        print("Starting estimation")
-
-
-class RedirectResource:
-    def on_get(self, req: Request, resp: Response):
-        # TODO: validate address
         target_address = req.get_param("address")
         if target_address is None:
             # TODO: redirect to regular frontend
@@ -126,16 +120,47 @@ class RedirectResource:
             resp.text = "missing param: address"
             return
 
-        # TODO: calculate amount of addr
-        amount = 5_000_000
-
-        # TODO: raise redirect to shop url
-        raise falcon.HTTPPermanentRedirect(
-            location=REDIRECT_URL.format(address=target_address, amount=amount)
+        calc = CarbonCalculator(api_key=ETHERSCAN_API_KEY)
+        total_gas, co2_amount, tx_count = calc.getCarbonFootprintForContractAddress(
+            target_address
+        )
+        resp.content_type = falcon.MEDIA_JSON
+        resp.text = json.dumps(
+            {
+                "address": target_address,
+                "amount": co2_amount,
+                "totalGas": total_gas,
+                "txCount": tx_count,
+            }
         )
 
 
-app = falcon.App()
+class RedirectResource:
+    def on_get(self, req: Request, resp: Response):
+        # validate address
+        target_address = req.get_param("address")
+        if target_address is None:
+            # TODO: redirect to regular frontend
+            resp.status = falcon.HTTP_400
+            resp.content_type = falcon.MEDIA_TEXT
+            resp.text = "missing param: address"
+            return
+
+        # calculate amount of addr
+        calc = CarbonCalculator(api_key=ETHERSCAN_API_KEY)
+        total_gas, co2_amount, tx_count = calc.getCarbonFootprintForContractAddress(
+            target_address
+        )
+
+        # raise redirect to shop url
+        raise falcon.HTTPPermanentRedirect(
+            location=REDIRECT_URL.format(address=target_address, amount=co2_amount)
+        )
+
+
+app = falcon.App(
+    middleware=falcon.CORSMiddleware(allow_origins="*", allow_credentials="*")
+)
 app.add_route("/success", SuccessCallbackResource())
 app.add_route("/failure", FailureCallbackResource())
 app.add_route("/estimate", EstimationResource())
