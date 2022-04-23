@@ -7,9 +7,9 @@ import falcon
 
 PATCH_API_KEY = "key_test_406d0d4c03d8da034afb695155318569"
 BASE_URL = "https://api.patch.io"
-
-
-
+NFT_ADDR = ""
+PUBLIC_KEY = "0x2ca0649D6F544bFF02f3917E2419693d094166D2"
+PRIVATE_KEY = "49e81553780e86df5e537ae647e63126bf8384204284b3491c20825a72129771"
 
 # TODO: build erc721 contract, generate local privkey, set pubkey as owner
 
