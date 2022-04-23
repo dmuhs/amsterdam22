@@ -3,8 +3,6 @@ import falcon
 import resources
 
 
-
-
 app = falcon.App(
     middleware=falcon.CORSMiddleware(allow_origins="*", allow_credentials="*")
 )
