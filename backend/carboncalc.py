@@ -4,7 +4,7 @@ import time
 
 class ChainExplorerConfig:
     ETHERSCAN = {"apiKey": "RVXR4IXM4K7TKUI2H7XQBGHZDDBP393KFP", "baseUri": "etherscan.io"} # dom
-    POLYGONSCAN = {"apiKey": "V99R51EYZRATHEK6QK3T3ACPXHFCBMFCWF", "baseUri": "api.polygonscan.com"} # rmfblqsrfthfxssbrk - password: rmfblqsrfthfxssbrk@bvhrk.com
+    POLYGONSCAN = {"apiKey": "V99R51EYZRATHEK6QK3T3ACPXHFCBMFCWF", "baseUri": "api.polygonscan.com"} # rmfblqsrfthfxssbrk - password: rmfblqsrfthfxssbrk@bvhrk.com (throwaway)
 
 
 class CarbonCalculator(object):
@@ -53,7 +53,7 @@ class CarbonCalculator(object):
 
 
 def test():
-    cc = CarbonCalculator(ChainExplorerConfig.POLYGONSCAN)
+    cc = CarbonCalculator(ChainExplorerConfig.ETHERSCAN)
     print(cc.getCarbonFootprintForContractAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", lambda tx: int(tx["timeStamp"])>=int(time.time()) - 60*60*24 )) # carbon footprint for all TX
 
 if __name__ == "__main__":
