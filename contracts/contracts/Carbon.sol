@@ -28,8 +28,8 @@ contract Carbon is ERC721, Ownable {
 
     function formatSvg(uint256 tokenId) private view returns (string memory) {
         string
-            memory head = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" xml:space="preserve"><path fill="#14fa09" transform="translate(200 200)" d="M-200-200H200V200H-200z"/><svg viewBox="-13 -12 40 40" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="1.4"><path d="M8 12 3 9l5 7 4.9-7-5 3zM8 0 3.1 8.1l5 3 4.8-3L8 0z" fill="#010101"/></svg><text font-family="Alegreya" font-size="30" font-weight="600" transform="translate(200 48.8)"><tspan x="-136.2" y="9.4">YOU COMPENSATED</tspan></text><text font-family="Alegreya" font-size="30" font-weight="500" transform="translate(200 354)"><tspan x="-80" y="10.4">';
-        string memory tail = " T Co2 !</tspan></text></svg>";
+            memory head = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" xml:space="preserve"><path fill="#14fa09" transform="translate(200 200)" d="M-200-200H200V200H-200z"/><svg viewBox="-13 -12 40 40" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="1.4"><path d="M8 12 3 9l5 7 4.9-7-5 3zM8 0 3.1 8.1l5 3 4.8-3L8 0z" fill="#010101"/></svg><text font-family="Alegreya" font-size="30" font-weight="600" transform="translate(200 48.8)"><tspan x="-136.2" y="9.4">YOU CONTRIBUTED!</tspan></text><text font-family="Alegreya" font-size="30" font-weight="500" transform="translate(200 354)"><tspan x="-80" y="10.4">';
+        string memory tail = "t CO2 !</tspan></text></svg>";
         string memory carbon = carbonCompensated[tokenId].toString();
         return string(abi.encodePacked(head, carbon, tail));
     }
