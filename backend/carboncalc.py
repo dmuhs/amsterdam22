@@ -3,20 +3,9 @@ import time
 
 
 class ChainExplorerConfig:
-<<<<<<< HEAD
-    ETHERSCAN = {
-        "apiKey": "RVXR4IXM4K7TKUI2H7XQBGHZDDBP393KFP",
-        "baseUri": "api.etherscan.io",
-    }  # dom
-    POLYGONSCAN = {
-        "apiKey": "V99R51EYZRATHEK6QK3T3ACPXHFCBMFCWF",
-        "baseUri": "api.polygonscan.com",
-    }  # rmfblqsrfthfxssbrk - password: rmfblqsrfthfxssbrk@bvhrk.com (throwaway)
-=======
     ETHERSCAN = {"apiKey": "RVXR4IXM4K7TKUI2H7XQBGHZDDBP393KFP", "baseUri": "api.etherscan.io"} # dom
     POLYGONSCAN = {"apiKey": "V99R51EYZRATHEK6QK3T3ACPXHFCBMFCWF", "baseUri": "api.polygonscan.com"} # rmfblqsrfthfxssbrk - password: rmfblqsrfthfxssbrk@bvhrk.com (throwaway)
     OPTIMISM = {"apiKey": "7WTXX7U4PUUBJ9SRNT62C2X1S7A8R3UWHT", "baseUri":"api-optimistic.etherscan.io"} # jeujuzawxslhxxsjce@nthrw.com user and pass
->>>>>>> e271f940da6f3f5567c90f86277a38cb2ece121f
 
 
 class CarbonCalculator:
