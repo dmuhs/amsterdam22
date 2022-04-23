@@ -1,4 +1,5 @@
 import requests
+from loguru import logger
 
 
 class CarbonCalculator:
