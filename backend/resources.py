@@ -12,8 +12,6 @@ KNOWN_ACCOUNTS = []
 
 class SuccessCallbackResource:
     def on_get(self, req: Request, resp: Response):
-        # TODO: Whitelist origin 80.113.211.254
-
         client = patch_api.ApiClient(api_key=config.PATCH_API_KEY)
 
         doc = req.stream.read(req.content_length or 0)

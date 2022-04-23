@@ -2,7 +2,6 @@ import requests
 
 
 class CarbonCalculator:
-
     G_CO2_PER_GAS = 0.1809589427
     ENDPOINT = "https://{baseUri}/api?module=account&action=txlist&address={address}&startblock={startblock}&endblock={endblock}&page={page}&offset={offset}&sort={sort}&apikey={apikey}"
     HEADERS = {
@@ -28,7 +27,7 @@ class CarbonCalculator:
         resp = requests.get(url, headers=self.HEADERS)
         data = resp.json()
         if data.get("status") != "1" or data.get("message") != "OK":
-            print("some shit happened")
+            print("data provider error")
             return 0, 0, 0
 
         if not data["result"]:
