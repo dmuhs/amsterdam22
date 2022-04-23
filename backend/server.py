@@ -21,7 +21,12 @@ REDIRECT_URL = "https://checkout.patch.io/che_test_d1101c10f00dad1402f21ccc54f56
 FRONTEND_SUCCESS_URL = None  # auto-redirects to certificate if None
 FRONTEND_URL = "http://"
 FALLBACK_URL = "https://google.com"  # TODO: replace with frontend url
-ETHERSCAN_API_KEY = "RVXR4IXM4K7TKUI2H7XQBGHZDDBP393KFP"
+
+class EtherscanApiConfig:
+    ETHERSCAN = {"apiKey": "RVXR4IXM4K7TKUI2H7XQBGHZDDBP393KFP", "baseUri": "api.etherscan.io"} # dom
+    POLYGONSCAN = {"apiKey": "V99R51EYZRATHEK6QK3T3ACPXHFCBMFCWF", "baseUri": "api.polygonscan.com"} # rmfblqsrfthfxssbrk - password: rmfblqsrfthfxssbrk@bvhrk.com (throwaway)
+
+
 # TODO: build erc721 contract, generate local privkey, set pubkey as owner
 
 
@@ -120,7 +125,7 @@ class EstimationResource:
             resp.text = "missing param: address"
             return
 
-        calc = CarbonCalculator(api_key=ETHERSCAN_API_KEY)
+        calc = CarbonCalculator(chainConfig=EtherscanApiConfig.ETHERSCAN)
         total_gas, co2_amount, tx_count = calc.getCarbonFootprintForContractAddress(
             target_address
         )
